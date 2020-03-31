@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="boardMapper">
+	<!-- 운송장 검색 부분 -->
+	<select id="lookupResult" resultMap="SearchResponseResult">
+		<if test="waybillNum != null">
+		SELECT WAYBILL_NUMBER, SE_NAME, RE_NAME, PRODUCT_NAME
+		FROM AAA_DELIVERY_CHART
+		WHERE WAYBILL_NUMBER = #{waybillNum}
+		</if>
+		<if test="reservationNum != null">
+		SELECT WAYBILL_NUMBER, SE_NAME, RE_NAME, PRODUCT_NAME FROM AAA_DELIVERY_CHART WHERE DNO = (SELECT LPAD(DNO, 13, '0') AS DNO FROM AAA_DELIVERY_CHART WHERE DNO = #{reservationNum})
+		<!-- 예약번호 0붙일지 말지 결정해야함. 현문이랑 상의할 것-->
+		</if>
+	</select>
+	
+	<select id="lookupListResult" resultMap="SearchResponseListResult">
+		SELECT DELIVERY_INFORMATION, PROCESS_DATE, DELIVERY_LOCATION
+		FROM AAA_DELIVERY_STATE
+		<if test="waybillNum != null">
+		WHERE WAYBILL_NUMBER = #{waybillNum}
+		</if>
+		<if test="reservationNum != null">
+		WHERE DNO = (SELECT LPAD(DNO, 13, '0') AS DNO FROM AAA_DELIVERY_CHART WHERE DNO = #{reservationNum})
+		</if>
+		ORDER BY PROCESS_DATE, DLNO
+	</select>
+	
+	<!-- 택배예약 부분 -->
+	<insert id="reservationInsert" parameterType="ReservationDto">
+		INSERT INTO AAA_DELIVERY_CHART 
+	    	(DNO, WAYBILL_NUMBER, SE_NAME, SE_PHONE, SE_ADDR1, SE_ADDR2, SE_ADDR3, RE_NAME, RE_PHONE, RE_ADDR1, RE_ADDR2, RE_ADDR3, PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_FARE, PRODUCT_FARE_PRICE, CNO <if test="senderReq == null and senderReq.equals('')"> SE_REQ</if>)
+		VALUES (AAA_DNO_SEQ.NEXTVAL, LPAD(AAA_WAYBILLNUM_SEQ.NEXTVAL,12,'0'), #{senderName}, #{senderPhone}, #{senderPostCode}, #{senderAddr1}, #{senderAddr2}, #{receiverName}, #{receiverPhone}, #{receiverPostCode}, #{receiverAddr1}, #{receiverAddr2}, #{productName}, #{productPrice}, #{fareCategoryCode}, #{freightCost}, #{courierCode} <if test="senderReq == null and senderReq.equals('')">,#{senderReq} </if>)
+	</insert>
+	
+	<insert id="reservationInsert2">
+		INSERT INTO AAA_DELIVERY_STATE (DLNO, DELIVERY_TYPE, DNO, WAYBILL_NUMBER)
+		VALUES (AAA_DLNO_SEQ.NEXTVAL, 0, AAA_DNO_SEQ.CURRVAL, LPAD(AAA_WAYBILLNUM_SEQ.CURRVAL,12,'0'))
+	</insert>
+	
+<!-- 	INSERT INTO AAA_DELIVERY_CHART  -->
+<!--     	(DNO, WAYBILL_NUMBER, SE_NAME, SE_PHOEN, SE_ADDR1, SE_ADDR2, SE_ADDR3, SE_REQ, RE_NAME, RE_PHONE, RE_ADDR1, RE_ADDR2, RE_ADDR3, PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_FARE, PRODUCT_FARE_PRICE, CNO) -->
+<!-- 	VALUES ('4', LPAD(AAA_WAYBILLNUM_SEQ.NEXTVAL,11,'0'), '홍길동', '01045457878', '18510', '경기 화성시 경기동로 138', '동호아파트 205동 903호', 'ss', '박흥부', '01078951212', '18334', '경기 화성시 봉담읍 당하리 161-11', '당진아파트 802동 501호', '의류', '45800', '1', 4000, '1234'); -->
+	
+	<resultMap type="SearchResponseVO" id="SearchResponseResult">
+		<result property="waybillNum" column="WAYBILL_NUMBER"/>
+		<result property="senderName" column="SE_NAME"/>
+		<result property="receiverName" column="RE_NAME"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+	</resultMap>
+	<resultMap type="SearchResponseListVO" id="SearchResponseListResult">
+		<result property="deliveryStep" column="DELIVERY_INFORMATION"/>
+		<result property="processTime" column="PROCESS_DATE"/>
+		<result property="productStatus" column="DELIVERY_LOCATION"/>
+	</resultMap>
+	
+</mapper>

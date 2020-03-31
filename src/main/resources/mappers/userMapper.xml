@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userMapper">
+	<select id="chkInputId" parameterType="String" resultType="int">
+		SELECT COUNT(ID)
+		FROM AAA_MEMBER
+		WHERE ID = #{inputId}
+	</select>
+	
+	<select id="login" resultType="String">
+		SELECT PASS
+		FROM AAA_MEMBER
+		WHERE ID LIKE #{userId}
+	</select>
+	
+	<select id="sessionRegister" resultMap="UserResult">
+		SELECT ID, NAME, PHONE
+		FROM AAA_MEMBER
+		WHERE ID LIKE #{userId}
+	</select>
+	
+	<insert id="insertSignup">
+		<selectKey keyProperty="memberNo" resultType="integer" order="BEFORE">
+       		SELECT AAA_MNO.NEXTVAL FROM DUAL
+   		</selectKey>
+		INSERT INTO AAA_MEMBER(
+			MNO, 
+			ID,
+			PASS,
+			NAME,
+			BIRTH,
+			EMAIL,
+			PHONE,
+			ADDR1,
+			ADDR2,
+			ADDR3
+		)
+		VALUES(
+			#{memberNo},
+			#{userId},
+			#{userPwd},
+			#{userName},
+			TO_DATE('${userBirthYear}-${userBirthMonth}-${userBirthDay}', 'YYYY-MM-DD'),
+			'${userEmail1}@${userEmail2}',
+			#{userPhone},
+			#{postCode},
+			#{addr1},
+			#{addr2}
+		)
+	</insert>
+	
+	<resultMap type="UserVO" id="UserResult">
+		<result property="userId" column="ID"/>
+		<result property="userName" column="NAME"/>
+		<result property="userPhone" column="PHONE"/>
+	</resultMap>
+</mapper>

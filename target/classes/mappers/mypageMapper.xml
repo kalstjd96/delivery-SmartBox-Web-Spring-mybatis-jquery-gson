@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mypageMapper">
+	<select id="myDeliveryList" resultMap="myDeliveryResponseResult">
+	SELECT ch.PRODUCT_NAME, ch.WAYBILL_NUMBER, ch.SE_NAME, st.PROCESS_DATE, st.DELIVERY_INFORMATION
+	FROM AAA_DELIVERY_STATE st INNER JOIN AAA_DELIVERY_CHART ch ON st.WAYBILL_NUMBER = ch.WAYBILL_NUMBER
+	WHERE st.PROCESS_DATE IN (SELECT MAX(PROCESS_DATE) FROM AAA_DELIVERY_STATE GROUP BY WAYBILL_NUMBER) 
+		AND #{loginName} IN (ch.SE_NAME, ch.RE_NAME) 
+		AND #{phone} IN (ch.se_phone, ch.re_phone)
+	<if test='(startDate != null and startDate != "") or (endDate != null and endDate != "")'>
+	<![CDATA[
+		AND PROCESS_DATE >= TO_DATE(#{startDate},'YYYY-MM-DD')
+		AND PROCESS_DATE <  TO_DATE(#{endDate},'YYYY-MM-DD')+1
+	]]>
+	</if>
+	ORDER BY st.PROCESS_DATE DESC
+	</select>
+	
+	<select id="responseDelivery" resultMap="SearchResponseResult">
+	    SELECT WAYBILL_NUMBER, SE_NAME, RE_NAME, PRODUCT_NAME
+		FROM AAA_DELIVERY_CHART
+		WHERE WAYBILL_NUMBER = #{waybillNum}
+	</select>
+	
+	<select id="responseDeliveryList" resultMap="SearchResponseListResult">
+	    SELECT DELIVERY_INFORMATION, PROCESS_DATE, DELIVERY_LOCATION, DELIVERY_TYPE
+		FROM AAA_DELIVERY_STATE
+		WHERE WAYBILL_NUMBER = #{waybillNum}
+        ORDER BY PROCESS_DATE, DLNO
+	</select>
+	
+	<select id="getUserInfo" resultMap="UserInfoResult">
+		SELECT MNO, ID, NAME, BIRTH, EMAIL, PHONE, ADDR1, ADDR2, ADDR3, JOIN_DATE
+        FROM AAA_MEMBER
+        WHERE ID = #{userId}
+	</select>
+	
+	<select id="getUserPwd" resultType="String">
+		SELECT PASS
+		FROM AAA_MEMBER
+		WHERE ID = #{userId}
+	</select>
+	
+	<update id="modifyUserInfo">
+		UPDATE AAA_MEMBER SET EMAIL = '${userEmail1}@${userEmail2}', PHONE = #{userPhone}, ADDR1 = #{postCode}, ADDR2 = #{addr1}, ADDR3 = #{addr2}
+	    WHERE ID = #{userId}
+	</update>
+	
+	<update id="changePwd">
+		UPDATE AAA_MEMBER SET PASS = #{newPwd}
+		WHERE ID = #{userId}
+	</update>
+	
+	<select id="getMyinquiry" resultMap="MyinquiryResult">
+		SELECT INQUIRY_TYPE, TITLE, WAYBILL_NUMBER, REG_DATE, INQUIRY_STATUS, INO
+		FROM AAA_DELIVERY_INQUIRY
+		WHERE LOGIN_ID = #{userId}
+	</select>
+	
+	<select id="getMyinquiryDetail" resultMap="InquiryResult">
+		SELECT INO,PRODUCT_NAME, NAME, ADDR1, ADDR2, ADDR3, TITLE, CONTENTS
+		FROM AAA_DELIVERY_INQUIRY
+		WHERE INO = #{inquiryNo}
+	</select>
+	
+	<select id="getMyinquiryFile" resultMap="FileResult">
+		SELECT FNO, FILE_LOCATION, FILE_NAME
+		FROM AAA_DELIVERY_FILE
+		WHERE INO = #{inquiryNo}
+	</select>
+	
+	<resultMap type="SearchResponseVO" id="SearchResponseResult">
+		<result property="waybillNum" column="WAYBILL_NUMBER"/>
+		<result property="senderName" column="SE_NAME"/>
+		<result property="receiverName" column="RE_NAME"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+	</resultMap>
+	<resultMap type="SearchResponseListVO" id="SearchResponseListResult">
+		<result property="deliveryStep" column="DELIVERY_INFORMATION"/>
+		<result property="processTime" column="PROCESS_DATE"/>
+		<result property="productStatus" column="DELIVERY_LOCATION"/>
+		<result property="deliveryType" column="DELIVERY_TYPE"/>
+	</resultMap>
+	
+	<resultMap type="myDeliveryResponseList" id="myDeliveryResponseResult">
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="waybillNum" column="WAYBILL_NUMBER"/>
+		<result property="senderName" column="SE_NAME"/>
+		<result property="processTime" column="PROCESS_DATE"/>
+		<result property="deliveryStep" column="DELIVERY_INFORMATION"/>
+	</resultMap>
+	
+	<resultMap type="UserInfoVO" id="UserInfoResult">
+		<result property="userId" column="ID"/>
+		<result property="userName" column="NAME"/>
+		<result property="userPhone" column="PHONE"/>
+		<result property="userBirth" column="BIRTH"/>
+		<result property="userEmail" column="EMAIL"/>
+		<result property="postCode" column="ADDR1"/>
+		<result property="addr1" column="ADDR2"/>
+		<result property="addr2" column="ADDR3"/>
+		<result property="joinDate" column="JOIN_DATE"/>
+	</resultMap>
+	
+	<resultMap type="MyinquiryVO" id="MyinquiryResult">
+		<result property="inquiryType" column="INQUIRY_TYPE"/>
+		<result property="title" column="TITLE"/>
+		<result property="waybillNumber" column="WAYBILL_NUMBER"/>
+		<result property="regDate" column="REG_DATE"/>
+		<result property="inquiryStatus" column="INQUIRY_STATUS"/>
+		<result property="inquiryNo" column="INO"/>
+	</resultMap>
+	
+	<resultMap type="InquiryVO" id="InquiryResult">
+		<result property="inquiryNo" column="INO"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="name" column="NAME"/>
+		<result property="postCode" column="ADDR1"/>
+		<result property="addr1" column="ADDR2"/>
+		<result property="addr2" column="ADDR3"/>
+		<result property="title" column="TITLE"/>
+		<result property="contents" column="CONTENTS"/>
+	</resultMap>
+	
+	<resultMap type="FileVO" id="FileResult">
+		<result property="fileNo" column="FNO"/>
+		<result property="fileName" column="FILE_NAME"/>
+		<result property="fileLocation" column="FILE_LOCATION"/>
+	</resultMap>
+</mapper>

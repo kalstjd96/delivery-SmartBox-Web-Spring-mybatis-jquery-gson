@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	  <typeAliases>
+	  	<typeAlias type="com.cap.delivery.model.SearchDto" alias="SearchDto"/>
+	  	<typeAlias type="com.cap.delivery.model.SearchResponseVO" alias="SearchResponseVO"/>
+	  	<typeAlias type="com.cap.delivery.model.SearchResponseListVO" alias="SearchResponseListVO"/>
+	  	<typeAlias type="com.cap.delivery.model.ReservationDto" alias="ReservationDto"/>
+	  	<typeAlias type="com.cap.delivery.model.SignupDto" alias="SignupDto"/>
+	  	<typeAlias type="com.cap.delivery.model.UserVO" alias="UserVO"/>
+	  	<typeAlias type="com.cap.delivery.model.NoticeVO" alias="NoticeVO"/>
+	  	<typeAlias type="com.cap.delivery.model.InquiryVO" alias="InquiryVO"/>
+	  	<typeAlias type="com.cap.delivery.model.MyDeliveryDto" alias="MyDeliveryDto"/>
+	  	<typeAlias type="com.cap.delivery.model.myDeliveryResponseList" alias="myDeliveryResponseList"/>
+	  	<typeAlias type="com.cap.delivery.model.UserInfoVO" alias="UserInfoVO"/>
+	  	<typeAlias type="com.cap.delivery.model.MyinquiryVO" alias="MyinquiryVO"/>
+	  	<typeAlias type="com.cap.delivery.model.FileVO" alias="FileVO"/>
+	  </typeAliases>
+</configuration>

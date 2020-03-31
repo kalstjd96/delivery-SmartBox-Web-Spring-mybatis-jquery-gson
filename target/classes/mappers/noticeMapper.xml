@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="noticeMapper">
+	<select id="noticeListCount" resultType="int">
+	<![CDATA[
+        SELECT COUNT(NNO)
+		FROM AAA_DELIVERY_NOTICE
+		WHERE NNO > 0
+	]]>
+	</select>
+	
+	<select id="noticeCriteria" resultMap="NoticeResult">
+	<![CDATA[
+		SELECT * 
+		FROM(
+		      SELECT ROWNUM AS RNUM, A.*
+		          FROM ( SELECT * 
+		                  FROM 
+		                      AAA_DELIVERY_NOTICE
+		                  WHERE 
+		                      NNO > 0
+		                  ORDER BY 
+		                  NNO DESC, REGDATE DESC ) A
+		       WHERE ROWNUM <= #{rowEnd}
+		    )
+		WHERE RNUM >= #{rowStart}
+	]]>
+	</select>
+	
+	<select id="noticeRead" resultMap="NoticeResult">
+		SELECT
+	  		NNO, TITLE, CONTENTS, REGDATE, DIVISION
+	  	FROM 
+	  		AAA_DELIVERY_NOTICE
+	  	WHERE 
+	  		NNO = #{noticeNo}
+	</select>
+	
+	<update id="noticeModify">
+	  	UPDATE AAA_DELIVERY_NOTICE
+	  	SET
+	  		TITLE = #{title}
+	  		, CONTENTS = #{contents}
+	  		<choose>
+	  		<when test="division == 1">
+	  		, DIVISION = '공지사항'
+	  		</when>
+	  		<when test="division == 2">
+	  		, DIVISION = '이벤트'
+	  		</when>
+	  		</choose>
+	  	WHERE
+	  		NNO = #{noticeNo}
+  	</update>
+  	
+  	<delete id="noticeDelete">
+	  	DELETE FROM AAA_DELIVERY_NOTICE 
+		WHERE NNO = #{noticeNo}
+	</delete>
+	
+	<insert id="noticeInsert">
+		INSERT INTO AAA_DELIVERY_NOTICE(
+			NNO, TITLE, REGDATE, DIVISION, CONTENTS
+			)
+		VALUES(
+			AAA_NNO_SEQ.NEXTVAL
+			, #{title}
+			, SYSDATE
+			<choose>
+			<when test="division == 1">
+	  		, '공지사항'
+	  		</when>
+	  		<when test="division == 2">
+	  		, '이벤트'
+	  		</when>
+	  		</choose>
+			, #{contents}
+		)
+	</insert>
+	
+	<select id="mainList" resultMap="NoticeResult">
+	<![CDATA[
+		SELECT *
+		FROM AAA_DELIVERY_NOTICE
+		WHERE ROWNUM <=5
+		ORDER BY NNO DESC
+	]]>
+	</select>
+	
+	<resultMap type="NoticeVO" id="NoticeResult">
+		<result property="noticeNo" column="NNO"/>
+		<result property="title" column="TITLE"/>
+		<result property="contents" column="CONTENTS"/>
+		<result property="regDate" column="REGDATE"/>
+		<result property="division" column="DIVISION"/>
+	</resultMap>
+</mapper>
