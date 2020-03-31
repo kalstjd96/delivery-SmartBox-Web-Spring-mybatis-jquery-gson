@@ -27,6 +27,8 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
 			if(userVO != null) {
 				httpSession.setAttribute(LOGIN, userVO);
 				logger.info("userVO Test!!!!!!!!!");
+				//response.sendRedirect("/delivery");
+				
 				if(request.getParameter("useCookie") != null) {
 					logger.info("Create loginCookie...");
 					// 쿠키생성
@@ -37,8 +39,12 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
 					response.addCookie(loginCookie);
 				}
 				
-				Object destination = httpSession.getAttribute("destination");
-				response.sendRedirect(destination != null ? (String)destination : "/");
+				//Object destination = httpSession.getAttribute("destination");
+				Object destination = httpSession.getAttribute(LOGIN);
+				logger.info("이동임 ...");
+				logger.info("destination"+destination);
+				response.sendRedirect(destination != null ? "/delivery" : "/");
+				//response.sendRedirect(destination != null ? (String)destination : "/"); //이쪽 문제 destination은 로그인된 loginView출력이 되어야한다.
 			}/*else {
 				logger.info("test 구간 ");
 				response.sendRedirect("/delivery/user/login");
